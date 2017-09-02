@@ -1,5 +1,24 @@
+const fs = require('fs');
+
+let readFile = fs.readFileSync('./input.txt','utf-8')
+let input_array = readFile.split('\n');
+
+const main = () => {
+  let params = input_array[0].split(' ');
+  let n = parseInt(params[0]);
+  let k = parseInt(params[1]);
+  let arr = input_array[1].split(' ');
+
+  let results = windowOfDays(n, k, arr);
+
+  process.stdout.write('' + results);
+  fs.writeFile('output.txt', results, 'utf-8', (err) => {
+    if (err) throw err;
+  });
+}  
+
 const windowOfDays = (n, k, arr) => {
-  let results = [];
+  let results = '';
   if (!(arr.length === n)) {
     console.log('** error ** mismatch in number of data elements');
     return;
@@ -26,13 +45,9 @@ const windowOfDays = (n, k, arr) => {
       }
     }
     totalCount += daySwitch * (dayCounter * (dayCounter + 1)) / 2;
-    results.push(totalCount);
+    results += totalCount + '\n'
   }
   return results;
 }
 
-let test_n = 5;
-let test_k = 3;
-let test_array = [188930, 194123, 201345, 154243, 154243];
-
-console.log(windowOfDays(test_n, test_k, test_array));
+main();
