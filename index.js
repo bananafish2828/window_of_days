@@ -14,24 +14,30 @@ const main = () => {
     return;
   }
 
-  fs.open('output.txt', 'w', (err, fd) => {
-    if (err) throw err;
+  // fs.open('output.txt', 'w', (err, fd) => {
+  //   if (err) throw err;
  
-    windowOfDays(n, k, arr, fd);
-    fs.close(fd, (err) => {
-      if (err) throw err;
-    });
-  });
+  let results = windowOfDays(n, k, arr);
+  //   fs.write(fd, results, (err) => {
+  //     if (err) throw err;
+  //   });
+  //   fs.close(fd, (err) => {
+  //     if (err) throw err;
+  //   });
+  // });
+  fs.writeFileSync('output.txt', results);
+
 }
 
 const sumOfDays = (i) => {
   return (i * (i + 1) / 2); 
 }
 
-const windowOfDays = (n, k, arr, fd) => {
+const windowOfDays = (n, k, arr) => {
 
 // initialize window
   let winOfDays = [];
+  results = ""
 
   let totalCount = 0;
   let dayCounter = 0;
@@ -58,9 +64,10 @@ const windowOfDays = (n, k, arr, fd) => {
   totalCount += daySwitch * sumOfDays(dayCounter);
   // console.log(winOfDays);
   // process.stdout.write('' + winOfDays + '\n');
-  fs.write(fd, totalCount + '\n', (err) => {
-    if (err) throw err;
-  });
+  // fs.write(fd, totalCount + '\n', (err) => {
+  //   if (err) throw err;
+  // });
+  results += totalCount + '\n'
   
   for (let idx = 0; idx < n - k; idx++) {
     if (arr[idx + k - 1] < arr[idx + k]) {
@@ -80,11 +87,12 @@ const windowOfDays = (n, k, arr, fd) => {
     winOfDays[0][0]--;
     if (!winOfDays[0][0]) winOfDays.shift();
 
-    fs.write(fd, totalCount + '\n', (err) => {
-      if (err) throw err;
-    });  
+    results += totalCount + '\n'
+    // fs.write(fd, totalCount + '\n', (err) => {
+    //   if (err) throw err;
+    // });  
   }
-  return;
+  return results;
 }
 
 main();
