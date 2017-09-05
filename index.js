@@ -9,45 +9,82 @@ const main = () => {
   let k = parseInt(params[1]);
   let arr = input_array[1].split(' ');
 
-  let results = windowOfDays(n, k, arr);
-
-  process.stdout.write('' + results);
-  fs.writeFile('output.txt', results, 'utf-8', (err) => {
-    if (err) throw err;
-  });
-}  
-
-const windowOfDays = (n, k, arr) => {
-  let results = '';
   if (!(arr.length === n)) {
     console.log('** error ** mismatch in number of data elements');
     return;
   }
-  for (let idx = 0; idx < n - k + 1; idx++) {
-    let totalCount = 0;
-    let dayCounter = 0;
-    let daySwitch = 0;
-    let newSwitch = 0;
-    for (let count = 0; count < k - 1; count ++) {
-      if (arr[idx + count] < arr[idx + count + 1]) {
+
+  fs.open('output.txt', 'w', (err, fd) => {
+    if (err) throw err;
+ 
+    windowOfDays(n, k, arr, fd);
+    fs.close(fd, (err) => {
+      if (err) throw err;
+    });
+  });
+}
+
+const sumOfDays = (i) => {
+  return (i * (i + 1) / 2); 
+}
+
+const windowOfDays = (n, k, arr, fd) => {
+
+// initialize window
+  let winOfDays = [];
+
+  let totalCount = 0;
+  let dayCounter = 0;
+  let daySwitch = 0;
+  let newSwitch = 0;
+  for (let count = 0; count < k - 1; count ++) {
+    if (arr[count] < arr[count + 1]) {
         newSwitch = 1;
-      } else if (arr[idx + count] > arr[idx + count + 1]) {
-        newSwitch = -1;
-      } else {
-        newSwitch = 0;
-      }
-      if (newSwitch === daySwitch) {
-        dayCounter++;
-      } else {
-        totalCount += daySwitch * (dayCounter * (dayCounter + 1)) / 2;
-        daySwitch = newSwitch;
-        dayCounter = 1;
-      }
+    } else if (arr[count] > arr[count + 1]) {
+      newSwitch = -1;
+    } else {
+      newSwitch = 0;
     }
-    totalCount += daySwitch * (dayCounter * (dayCounter + 1)) / 2;
-    results += totalCount + '\n'
+    if (newSwitch === daySwitch) {
+      dayCounter++;
+    } else {
+      if (dayCounter) winOfDays.push([dayCounter, daySwitch])
+      totalCount += daySwitch * sumOfDays(dayCounter);
+      daySwitch = newSwitch;
+      dayCounter = 1;
+    }
   }
-  return results;
+  winOfDays.push([dayCounter, daySwitch])
+  totalCount += daySwitch * sumOfDays(dayCounter);
+  // console.log(winOfDays);
+  // process.stdout.write('' + winOfDays + '\n');
+  fs.write(fd, totalCount + '\n', (err) => {
+    if (err) throw err;
+  });
+  
+  for (let idx = 0; idx < n - k; idx++) {
+    if (arr[idx + k - 1] < arr[idx + k]) {
+      newSwitch = 1;
+    } else if (arr[idx + k - 1] > arr[idx + k]) {
+      newSwitch = -1;
+    } else {
+      newSwitch = 0;
+    }
+    if (newSwitch === winOfDays[winOfDays.length - 1][1]) {
+      winOfDays[winOfDays.length - 1][0]++;
+    } else {
+      winOfDays.push([1, newSwitch]);
+    }
+    totalCount += winOfDays[winOfDays.length - 1][1] * winOfDays[winOfDays.length - 1][0];
+    totalCount -= winOfDays[0][1] * winOfDays[0][0];
+    winOfDays[0][0]--;
+    if (!winOfDays[0][0]) winOfDays.shift();
+
+    fs.write(fd, totalCount + '\n', (err) => {
+      if (err) throw err;
+    });  
+  }
+  return;
 }
 
 main();
